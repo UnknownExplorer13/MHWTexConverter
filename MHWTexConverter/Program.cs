@@ -203,12 +203,12 @@ namespace MHWTexConverter
 				FileInfo fi = new FileInfo(arg);
 				if (!fi.Exists)
 				{
-					Console.Error.WriteLine("ERROR: {0} not found", arg);
+					Console.Error.WriteLine($"ERROR: {arg} not found");
 					continue;
 				}
 				if (fi.Length < 0xC0)
 				{
-					Console.Error.WriteLine("ERROR: {0} is too small", arg);
+					Console.Error.WriteLine($"ERROR: {arg} is too small");
 					continue;
 				}
 
@@ -222,7 +222,7 @@ namespace MHWTexConverter
 						int magicNumber = reader.ReadInt32();
 						if (magicNumber != MagicNumberTex)
 						{
-							Console.Error.WriteLine("ERROR: {0} is not a valid tex file.", arg);
+							Console.Error.WriteLine($"ERROR: {arg} is not a valid tex file.");
 							continue;
 						}
 
@@ -263,7 +263,7 @@ namespace MHWTexConverter
 
 						if (texFormat == MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN)
 						{
-							Console.Error.WriteLine("ERROR: Unknown TEX format {0}. " + arg, type);
+							Console.Error.WriteLine($"ERROR: Unknown TEX format {type}. - {arg}");
 							Console.ReadLine();
 							continue;
 						}
@@ -296,7 +296,7 @@ namespace MHWTexConverter
 						int magicNumber = reader.ReadInt32();
 						if (magicNumber != MagicNumberDds)
 						{
-							Console.Error.WriteLine("ERROR: {0} is not a valid dds file.", magicNumber);
+							Console.Error.WriteLine($"ERROR: {magicNumber} is not a valid DDS file.");
 							continue;
 						}
 
@@ -311,12 +311,12 @@ namespace MHWTexConverter
 						reader.BaseStream.Position = 0x1C;
 						int mipMapCount = reader.ReadInt32();
 						reader.BaseStream.Position = 0x54;
-						int filetypecode = reader.ReadInt32();
+						int fileTypeCode = reader.ReadInt32();
 						reader.BaseStream.Position = 0x80;
 						int ddsformatint = reader.ReadInt32();
 						DXGI_FORMAT ddsformat = (DXGI_FORMAT)ddsformatint;
 						MHW_TEX_FORMAT texformat = MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN;
-						switch (filetypecode)
+						switch (fileTypeCode)
 						{
 							case 0x30315844: // DX10
 								{
@@ -358,7 +358,7 @@ namespace MHWTexConverter
 
 						if (texformat == MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN)
 						{
-							Console.Error.WriteLine("ERROR: Unsupported DDS format {0}. " + arg, filetypecode);
+							Console.Error.WriteLine($"ERROR: Unsupported DDS format {fileTypeCode}. - {arg}");
 							Console.ReadLine();
 							continue;
 						}
@@ -439,7 +439,7 @@ namespace MHWTexConverter
 					}
 				}
 
-				Console.WriteLine(Path.GetFileName(arg) + " finished!"); 
+				Console.WriteLine($"{Path.GetFileName(arg)} finished!");
 			}
 
 			return 0;
