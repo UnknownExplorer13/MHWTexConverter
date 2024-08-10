@@ -419,16 +419,16 @@ namespace MHWTexConverter
 								int maxWidth = isRaw ? 2 : 4;
 
 								if (TexWith4Bpp.Contains(texformat))
-									base_loc = base_loc + cur_width * cur_height / 2;
+									base_loc += cur_width * cur_height / 2;
 								else if (TexWith16Bpp.Contains(texformat))
-									base_loc = base_loc + cur_width * cur_height * 2;
+									base_loc += cur_width * cur_height * 2;
 								else if (isRaw)
-									base_loc = base_loc + cur_width * cur_height * 4;
+									base_loc += cur_width * cur_height * 4;
 								else
-									base_loc = base_loc + cur_width * cur_height;
+									base_loc += cur_width * cur_height;
 
-								cur_width = cur_width / 2;
-								cur_height = cur_height / 2;
+								cur_width /= 2;
+								cur_height /= 2;
 								
 								cur_width = cur_width > maxWidth ? cur_width : maxWidth;
 								cur_height = cur_height > maxWidth ? cur_height : maxWidth;
