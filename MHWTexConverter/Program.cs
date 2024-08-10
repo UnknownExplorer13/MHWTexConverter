@@ -155,7 +155,7 @@ namespace MHWTexConverter
 			DXGI_FORMAT_FORCE_UINT
 		}
 
-		static Dictionary<MHW_TEX_FORMAT, string> FormatTagMap = new Dictionary<MHW_TEX_FORMAT, string>()
+		public readonly static Dictionary<MHW_TEX_FORMAT, string> FormatTagMap = new Dictionary<MHW_TEX_FORMAT, string>()
 		{
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN, "UNKN_" },
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM, "R8G8B8A8_" },
@@ -170,7 +170,7 @@ namespace MHWTexConverter
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB, "BC7S_" }
 		};
 
-		static Dictionary<MHW_TEX_FORMAT, string> FormatMagicMap = new Dictionary<MHW_TEX_FORMAT, string>()
+		public readonly static Dictionary<MHW_TEX_FORMAT, string> FormatMagicMap = new Dictionary<MHW_TEX_FORMAT, string>()
 		{
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN, "UNKN" },
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM, "DX10" },
@@ -185,9 +185,9 @@ namespace MHWTexConverter
 			{ MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB, "DX10" }
 		};
 
-		static List<MHW_TEX_FORMAT> TexWith4Bpp = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM, MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM_SRGB, MHW_TEX_FORMAT.DXGI_FORMAT_BC4_UNORM };
-		static List<MHW_TEX_FORMAT> TexWith16Bpp = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_R8G8_UNORM };
-		static List<MHW_TEX_FORMAT> TexOfNewDDS = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM, MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB, MHW_TEX_FORMAT.DXGI_FORMAT_BC6H_UF16 };
+		public readonly static List<MHW_TEX_FORMAT> TexWith4Bpp = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM, MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM_SRGB, MHW_TEX_FORMAT.DXGI_FORMAT_BC4_UNORM };
+		public readonly static List<MHW_TEX_FORMAT> TexWith16Bpp = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_R8G8_UNORM };
+		public readonly static List<MHW_TEX_FORMAT> TexOfNewDDS = new List<MHW_TEX_FORMAT> { MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM, MHW_TEX_FORMAT.DXGI_FORMAT_BC7_UNORM_SRGB, MHW_TEX_FORMAT.DXGI_FORMAT_BC6H_UF16 };
 
 		public static int Main(string[] args)
 		{
