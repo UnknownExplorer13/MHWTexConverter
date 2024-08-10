@@ -212,7 +212,8 @@ namespace MHWTexConverter
 					continue;
 				}
 
-				if (Path.GetExtension(arg).Equals(".tex"))
+				string fileExt = Path.GetExtension(arg).ToUpper();
+				if (fileExt == ".TEX")
 				{
 
 					using (BinaryReader reader = new BinaryReader(File.OpenRead(arg)))
@@ -277,7 +278,7 @@ namespace MHWTexConverter
 						WriteDDS(destPath, height, width, texFormat, mipMapCount, typeMagic, ddsFormat, data);
 					}
 				}
-				else if (Path.GetExtension(arg).Equals(".dds"))
+				else if (fileExt == ".DDS")
 				{
 					string destPath = Path.GetFullPath(Path.ChangeExtension(arg, ".tex"));
 					Directory.CreateDirectory(Path.GetDirectoryName(destPath));
