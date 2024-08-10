@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tex2Dds", "Tex2Dds\Tex2Dds.csproj", "{01B53CED-7426-4D7E-A56B-CE7929A262D2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHWTexConverter", "MHWTexConverter\MHWTexConverter.csproj", "{01B53CED-7426-4D7E-A56B-CE7929A262D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
