@@ -300,142 +300,77 @@ namespace MHWTexConverter
 							continue;
 						}
 
+						// Header Flags
 						reader.BaseStream.Position = 0x8;
-						int ddsflag = reader.ReadInt32();
+						int ddsFlag = reader.ReadInt32();
 						bool isRaw = false;
-						if ((ddsflag & 0x8) == 0x8)
+						if ((ddsFlag & 0x8) == 0x8)
 							isRaw = true;
 
+						// Height/Width
 						int height = reader.ReadInt32();
 						int width = reader.ReadInt32();
+
+						// Mipmap Count
 						reader.BaseStream.Position = 0x1C;
 						int mipMapCount = reader.ReadInt32();
+
+						// DDS Pixel Format
 						reader.BaseStream.Position = 0x54;
 						int fileTypeCode = reader.ReadInt32();
 						reader.BaseStream.Position = 0x80;
-						int ddsformatint = reader.ReadInt32();
-						DXGI_FORMAT ddsformat = (DXGI_FORMAT)ddsformatint;
-						MHW_TEX_FORMAT texformat = MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN;
+						int ddsFormatInt = reader.ReadInt32();
+
+						MHW_TEX_FORMAT texFormat = MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN;
 						switch (fileTypeCode)
 						{
 							case 0x30315844: // DX10
 								{
-									string formatname = Enum.GetName(typeof(DXGI_FORMAT), ddsformatint);
+									string formatName = Enum.GetName(typeof(DXGI_FORMAT), ddsFormatInt);
 									foreach (string name in Enum.GetNames(typeof(MHW_TEX_FORMAT)))
 									{
-										if (formatname.Equals(name))
-											texformat = (MHW_TEX_FORMAT)Enum.Parse(typeof(MHW_TEX_FORMAT), formatname);
+										if (formatName.Equals(name))
+											texFormat = (MHW_TEX_FORMAT)Enum.Parse(typeof(MHW_TEX_FORMAT), formatName);
 									}
-									texformat = (MHW_TEX_FORMAT)Enum.Parse(typeof(MHW_TEX_FORMAT), Enum.GetName(typeof(DXGI_FORMAT), ddsformatint));
+									texFormat = (MHW_TEX_FORMAT)Enum.Parse(typeof(MHW_TEX_FORMAT), Enum.GetName(typeof(DXGI_FORMAT), ddsFormatInt));
 									break;
 								}
 							case 0x31545844: // DXT1
 								{
-									texformat = MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM;
+									texFormat = MHW_TEX_FORMAT.DXGI_FORMAT_BC1_UNORM;
 									break;
 								}
 							case 0x55344342: // BC4U
 								{
-									texformat = MHW_TEX_FORMAT.DXGI_FORMAT_BC4_UNORM;
+									texFormat = MHW_TEX_FORMAT.DXGI_FORMAT_BC4_UNORM;
 									break;
 								}
-							case 0x55354342: // ATI2 BC5U
-							case 0x32495441:
+							case 0x55354342: // BC5U
+							case 0x32495441: // ATI2
 								{
-									texformat = MHW_TEX_FORMAT.DXGI_FORMAT_BC5_UNORM;
+									texFormat = MHW_TEX_FORMAT.DXGI_FORMAT_BC5_UNORM;
 									break;
 								}
 							case 0x0: // Raw
 								{
 									if (isRaw)
-										texformat = MHW_TEX_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM;
+										texFormat = MHW_TEX_FORMAT.DXGI_FORMAT_R8G8B8A8_UNORM;
 									break;
 								}
 						}
 
-						reader.BaseStream.Position = (FormatMagicMap[texformat].Equals("DX10") && !isRaw) ? 0x94 : 0x80;
+						// Image Data
+						reader.BaseStream.Position = (FormatMagicMap[texFormat].Equals("DX10") && !isRaw) ? 0x94 : 0x80;
 						byte[] data = reader.ReadBytes((int)new FileInfo(arg).Length);
 
-						if (texformat == MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN)
+						if (texFormat == MHW_TEX_FORMAT.DXGI_FORMAT_UNKNOWN)
 						{
 							Console.Error.WriteLine($"ERROR: Unsupported DDS format {fileTypeCode}. - {arg}");
 							Console.ReadLine();
 							continue;
 						}
 
-						using (FileStream fsWrite = new FileStream(destPath, FileMode.Create))
-						{
-							byte[] WMagicNumberHead = Utils.StringToByteArray(WMagicNumberTex);
-							fsWrite.Write(WMagicNumberHead, 0, WMagicNumberHead.Length);
-							fsWrite.Write(Utils.intToBytesLittle(mipMapCount), 0, 4);
-							fsWrite.Write(Utils.intToBytesLittle(width), 0, 4);
-							fsWrite.Write(Utils.intToBytesLittle(height), 0, 4);
-							fsWrite.Write(Utils.intToBytesLittle(1), 0, 4);
-							fsWrite.Write(Utils.intToBytesLittle((int)texformat), 0, 4);
-							byte[] WTexSolid = Utils.StringToByteArray(TexFixedUnk);
-							fsWrite.Write(WTexSolid, 0, WTexSolid.Length);
-
-							if (TexOfNewDDS.Contains(texformat))
-								fsWrite.Write(Utils.intToBytesLittle(1), 0, 4);
-							else
-								fsWrite.Write(Utils.intToBytesLittle(0), 0, 4);
-
-							fsWrite.Write(Utils.intToBytesLittle(0, 4), 0, 4 * 4);
-							fsWrite.Write(Utils.intToBytesLittle(-1, 8), 0, 4 * 8);
-							fsWrite.Write(Utils.intToBytesLittle(width), 0, 4);
-							bool isFullWidth = isRaw || texformat == MHW_TEX_FORMAT.DXGI_FORMAT_R8G8_UNORM;
-
-							if(isFullWidth)
-								fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							else
-								fsWrite.Write(Utils.intToBytesLittle(width / 2), 0, 2);
-
-							fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							fsWrite.Write(Utils.intToBytesLittle(0, 2), 0, 4 * 2);
-
-							if (isFullWidth)
-								fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							else
-								fsWrite.Write(Utils.intToBytesLittle(width / 2), 0, 2);
-
-							fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							fsWrite.Write(Utils.intToBytesLittle(0, 2), 0, 4 * 2);
-
-							if (isFullWidth)
-								fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							else
-								fsWrite.Write(Utils.intToBytesLittle(width / 2), 0, 2);
-
-							fsWrite.Write(Utils.intToBytesLittle(width), 0, 2);
-							fsWrite.Write(Utils.intToBytesLittle(0, 8), 0, 4 * 8);
-							int cur_width = width;
-							int cur_height = height;
-
-							int base_loc = 0xb8 + mipMapCount * 8;
-							for (int i = 0; i < mipMapCount; i++)
-							{
-								fsWrite.Write(Utils.intToBytesLittle(base_loc), 0, 4);
-								fsWrite.Write(Utils.intToBytesLittle(0), 0, 4);
-								int maxWidth = isRaw ? 2 : 4;
-
-								if (TexWith4Bpp.Contains(texformat))
-									base_loc += cur_width * cur_height / 2;
-								else if (TexWith16Bpp.Contains(texformat))
-									base_loc += cur_width * cur_height * 2;
-								else if (isRaw)
-									base_loc += cur_width * cur_height * 4;
-								else
-									base_loc += cur_width * cur_height;
-
-								cur_width /= 2;
-								cur_height /= 2;
-								
-								cur_width = cur_width > maxWidth ? cur_width : maxWidth;
-								cur_height = cur_height > maxWidth ? cur_height : maxWidth;
-							}
-
-							fsWrite.Write(data, 0, data.Length);
-						}
+						WriteTEX(destPath, height, width, texFormat, mipMapCount, isRaw, data);
 					}
 				}
 
@@ -497,6 +432,90 @@ namespace MHWTexConverter
 					fsWrite.Write(Utils.intToBytesLittle((int)ddsFormat), 0, 4);
 					byte[] ArbNumByte = Utils.StringToByteArray(DX10FixedFlags);
 					fsWrite.Write(ArbNumByte, 0, ArbNumByte.Length);
+				}
+
+				// Image Data
+				fsWrite.Write(imgData, 0, imgData.Length);
+			}
+		}
+
+		public static void WriteTEX(string filePath, int h, int w, MHW_TEX_FORMAT texFormat, int mipCount, bool isRaw, byte[] imgData)
+		{
+			using (FileStream fsWrite = new FileStream(filePath, FileMode.Create))
+			{
+				// TEX Header
+				byte[] WMagicNumberHead = Utils.StringToByteArray(WMagicNumberTex);
+				fsWrite.Write(WMagicNumberHead, 0, WMagicNumberHead.Length);
+
+				// Mipmap Count
+				fsWrite.Write(Utils.intToBytesLittle(mipCount), 0, 4);
+
+				// Texture Width/Height
+				fsWrite.Write(Utils.intToBytesLittle(w), 0, 4);
+				fsWrite.Write(Utils.intToBytesLittle(h), 0, 4);
+
+				// Texture Format
+				fsWrite.Write(Utils.intToBytesLittle(1), 0, 4);
+				fsWrite.Write(Utils.intToBytesLittle((int)texFormat), 0, 4);
+
+				// TEX Unknown Value
+				byte[] WTexSolid = Utils.StringToByteArray(TexFixedUnk);
+				fsWrite.Write(WTexSolid, 0, WTexSolid.Length);
+
+				// Texture Format
+				if (TexOfNewDDS.Contains(texFormat))
+					fsWrite.Write(Utils.intToBytesLittle(1), 0, 4);
+				else
+					fsWrite.Write(Utils.intToBytesLittle(0), 0, 4);
+
+				// Reserved Bytes?
+				fsWrite.Write(Utils.intToBytesLittle(0, 4), 0, 4 * 4);
+				fsWrite.Write(Utils.intToBytesLittle(-1, 8), 0, 4 * 8);
+
+				// Full Width/Half Width
+				fsWrite.Write(Utils.intToBytesLittle(w), 0, 4);
+				bool isFullWidth = isRaw || texFormat == MHW_TEX_FORMAT.DXGI_FORMAT_R8G8_UNORM;
+				if (isFullWidth)
+					fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				else
+					fsWrite.Write(Utils.intToBytesLittle(w / 2), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(0, 2), 0, 4 * 2);
+				if (isFullWidth)
+					fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				else
+					fsWrite.Write(Utils.intToBytesLittle(w / 2), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(0, 2), 0, 4 * 2);
+				if (isFullWidth)
+					fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				else
+					fsWrite.Write(Utils.intToBytesLittle(w / 2), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(w), 0, 2);
+				fsWrite.Write(Utils.intToBytesLittle(0, 8), 0, 4 * 8);
+				int cur_width = w;
+				int cur_height = h;
+				int base_loc = 0xb8 + mipCount * 8;
+				for (int i = 0; i < mipCount; i++)
+				{
+					fsWrite.Write(Utils.intToBytesLittle(base_loc), 0, 4);
+					fsWrite.Write(Utils.intToBytesLittle(0), 0, 4);
+					int maxWidth = isRaw ? 2 : 4;
+
+					if (TexWith4Bpp.Contains(texFormat))
+						base_loc += cur_width * cur_height / 2;
+					else if (TexWith16Bpp.Contains(texFormat))
+						base_loc += cur_width * cur_height * 2;
+					else if (isRaw)
+						base_loc += cur_width * cur_height * 4;
+					else
+						base_loc += cur_width * cur_height;
+
+					cur_width /= 2;
+					cur_height /= 2;
+
+					cur_width = cur_width > maxWidth ? cur_width : maxWidth;
+					cur_height = cur_height > maxWidth ? cur_height : maxWidth;
 				}
 
 				// Image Data
